@@ -21,8 +21,8 @@ private:
     int _width;
     int _height;
 
-    float _frequency = 100.0f;
-    float _length = 20.0f;
+    float _frequency = 20.0f;
+    float _length = 1.0f;
     float _amplitude = 1.0f;
     float _maxSimSpeed = 343;
     

@@ -244,9 +244,13 @@ void Visualizer::update() {
     // Skip clicks if ImGui has focus
     if (!ImGui::GetIO().WantCaptureMouse) {
         if (glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+            int width, height;
             double xpos, ypos;
+            glfwGetFramebufferSize(_window, &width, &height);
             glfwGetCursorPos(_window, &xpos, &ypos);
-            AddValueToTexture(xpos, ypos);
+            int tex_x = static_cast<int>(xpos * _width / width);
+            int tex_y = static_cast<int>((height - ypos) * _height / height);
+            AddValueToTexture(tex_x, tex_y);
         }
     }
 
@@ -310,11 +314,11 @@ void Visualizer::update() {
     glfwPollEvents();
 }
 
-void Visualizer::AddValueToTexture(double xpos, double ypos) {
+void Visualizer::AddValueToTexture(double tex_x, double tex_y) {
     
-    // Convert window coordinates to texture coordinates
-    int tex_x = static_cast<int>(xpos);
-    int tex_y = static_cast<int>(_height - ypos);
+    if (tex_x < 0 || tex_x >= _width || tex_y < 0 || tex_y >= _height) {
+        return;
+    }
 
     if (_lastMousePoint == cv::Point2i(tex_x, tex_y)) {
         return;
