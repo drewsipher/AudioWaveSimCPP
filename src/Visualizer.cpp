@@ -102,6 +102,7 @@ void Visualizer::CreateTextures() {
     // Create texture for density data
     cv::Mat speedImage = cv::Mat::zeros(_height, _width, CV_32F);
     speedImage.setTo(343.0f);
+    _maxSimSpeed = 343.0f;
     // cv::circle(speedImage, cv::Point(_width / 2, _height / 2), std::min(_width, _height) / 4, cv::Scalar(200.0f), -1);
     
     glGenTextures(1, &_speedsTex);
@@ -229,16 +230,24 @@ void Visualizer::DrawUI() {
 
     ImGui::Begin("Tools");
 
-    ImGui::RadioButton("Sources", &_editMode, EDIT_SOURCES);
-    ImGui::RadioButton("Speeds", &_editMode, EDIT_SPEEDS);
+    if (ImGui::RadioButton("Sources", &_editMode, EDIT_SOURCES)) {
+        _editMode = EDIT_SOURCES;
+    }
+    if (ImGui::RadioButton("Speeds", &_editMode, EDIT_SPEEDS)) {
+        _editMode = EDIT_SPEEDS;
+    }
 
     if (_editMode == EDIT_SOURCES) {
         ImGui::SliderFloat("Frequency", &_frequency, 1.0f, 10000.0f);
         ImGui::SliderFloat("Length", &_length, 1.0f, 10000.0f);
         ImGui::SliderFloat("Amplitude", &_amplitude, 0.0f, 100.0f);
     } else if (_editMode == EDIT_SPEEDS) {
-        ImGui::RadioButton("Rectangle", &_speedShape, SHAPE_RECTANGLE);
-        ImGui::RadioButton("Circle", &_speedShape, SHAPE_CIRCLE);
+        if (ImGui::RadioButton("Rectangle", &_speedShape, SHAPE_RECTANGLE)) {
+            _speedShape = SHAPE_RECTANGLE;
+        }
+        if (ImGui::RadioButton("Circle", &_speedShape, SHAPE_CIRCLE)) {
+            _speedShape = SHAPE_CIRCLE;
+        }
         ImGui::SliderFloat("Speed", &_currentSpeed, 0.0f, _maxSpeed);
     }
 
@@ -255,7 +264,7 @@ void Visualizer::update() {
             glfwGetCursorPos(_window, &xpos, &ypos);
             int tex_x = static_cast<int>(xpos * _width / width);
             int tex_y = static_cast<int>((height - ypos) * _height / height);
-            ApplyTool(tex_x, tex_y);
+            ApplyTool(xpos, ypos);
         }
     }
 
@@ -302,7 +311,6 @@ void Visualizer::update() {
     glUniform1i(glGetUniformLocation(_shaderProgram, "currentWave"), 0);
     glUniform1i(glGetUniformLocation(_shaderProgram, "speedValues"), 1);
     glUniform1i(glGetUniformLocation(_shaderProgram, "sources"), 2);
-    glUniform1f(glGetUniformLocation(_shaderProgram, "maxSimSpeed"), _maxSimSpeed);
 
     glBindVertexArray(_VAO);
     glActiveTexture(GL_TEXTURE0);
@@ -320,20 +328,28 @@ void Visualizer::update() {
     glfwPollEvents();
 }
 
-void Visualizer::ApplyTool(double tex_x, double tex_y) {
+void Visualizer::ApplyTool(double xpos, double ypos) {
+    int width, height;
+    glfwGetFramebufferSize(_window, &width, &height);
+    int tex_x = static_cast<int>(xpos * _width / width);
+    int tex_y = static_cast<int>((height - ypos) * _height / height);
+
     if (tex_x < 0 || tex_x >= _width || tex_y < 0 || tex_y >= _height) {
         return;
     }
 
-    if (_lastMousePoint == cv::Point2i(tex_x, tex_y)) {
-        return;
-    }
-    _lastMousePoint = cv::Point2i(tex_x, tex_y);
-
     if (_editMode == EDIT_SOURCES) {
         AddValueToTexture(tex_x, tex_y);
     } else if (_editMode == EDIT_SPEEDS) {
-        DrawSpeedShape(tex_x, tex_y);
+        if (!_isDrawing) {
+            // Start drawing
+            _isDrawing = true;
+            _startPoint = cv::Point2i(tex_x, tex_y);
+        } else {
+            // End drawing
+            _isDrawing = false;
+            DrawSpeedShape(_startPoint.x, _startPoint.y, tex_x, tex_y);
+        }
     }
 }
 
@@ -361,7 +377,7 @@ void Visualizer::AddValueToTexture(double tex_x, double tex_y) {
 
 }
 
-void Visualizer::DrawSpeedShape(double tex_x, double tex_y) {
+void Visualizer::DrawSpeedShape(double x1, double y1, double x2, double y2) {
     // Bind the speeds texture
     glBindTexture(GL_TEXTURE_2D, _speedsTex);
 
@@ -371,27 +387,32 @@ void Visualizer::DrawSpeedShape(double tex_x, double tex_y) {
 
     if (_speedShape == SHAPE_RECTANGLE) {
         // Draw a rectangle
-        int rectWidth = 20;
-        int rectHeight = 20;
-        for (int y = std::max(0, (int)tex_y - rectHeight / 2); y < std::min(_height, (int)tex_y + rectHeight / 2); ++y) {
-            for (int x = std::max(0, (int)tex_x - rectWidth / 2); x < std::min(_width, (int)tex_x + rectWidth / 2); ++x) {
+        int startX = std::min((int)x1, (int)x2);
+        int endX = std::max((int)x1, (int)x2);
+        int startY = std::min((int)y1, (int)y2);
+        int endY = std::max((int)y1, (int)y2);
+
+        for (int y = std::max(0, startY); y < std::min(_height, endY); ++y) {
+            for (int x = std::max(0, startX); x < std::min(_width, endX); ++x) {
                 int index = y * _width + x;
                 data[index] = _currentSpeed;
             }
         }
     } else if (_speedShape == SHAPE_CIRCLE) {
         // Draw a circle
-        int radius = 10;
+        int centerX = (int)(x1 + x2) / 2;
+        int centerY = (int)(y1 + y2) / 2;
+        int radius = (int)sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2)) / 2;
+
         for (int y = 0; y < _height; ++y) {
             for (int x = 0; x < _width; ++x) {
-                if ((x - tex_x) * (x - tex_x) + (y - tex_y) * (y - tex_y) <= radius * radius) {
+                if ((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY) <= radius * radius) {
                     int index = y * _width + x;
                     data[index] = _currentSpeed;
                 }
             }
         }
     }
-    _maxSimSpeed = std::max(_maxSimSpeed, _currentSpeed);
 
     // Update the texture with the modified data
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RED, GL_FLOAT, data.data());
@@ -426,8 +447,6 @@ void Visualizer::Reset() {
 
     // Unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
-    
-    _maxSimSpeed = 343.0f;
 
 }
 

@@ -39,6 +39,10 @@ private:
         SHAPE_CIRCLE
     };
     int _speedShape = SHAPE_RECTANGLE;
+
+    // New member variables for drawing shapes
+    bool _isDrawing = false;
+    cv::Point2i _startPoint;
     
     std::string LoadShaderSource(const char* filePath);
     GLuint CompileShader(GLenum type, const char* filePath);
@@ -50,7 +54,7 @@ private:
     void DrawUI();
     void ApplyTool(double xpos, double ypos);
     void AddValueToTexture(double xpos, double ypos);
-    void DrawSpeedShape(double tex_x, double tex_y);
+    void DrawSpeedShape(double x1, double y1, double x2, double y2); // Updated signature
     void Reset();
 
     cv::Point2i _lastMousePoint = cv::Point2i(-1, -1);
