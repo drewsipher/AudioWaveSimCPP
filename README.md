@@ -1,4 +1,4 @@
-# AudioWaveSimCPP
+[Screencast from 2025-04-07 09:10:17 PM.webm](https://github.com/user-attachments/assets/0a75dc5e-00d8-467e-a952-48537aeaf29a)# AudioWaveSimCPP
 
 ## Overview
 
@@ -29,6 +29,11 @@ This simulator was created to:
 - **Wave Equation Solver**: Implements numerical methods for solving the acoustic wave equation
 - **Multi-threading**: Parallel processing to accelerate simulation calculations
 - **Cross-platform Compatibility**: Developed with portability in mind
+
+## Screenshots
+
+[Screencast from 2025-04-07 09:10:17 PM.webm](https://github.com/user-attachments/assets/00ffcef0-a48b-4d03-b472-234db08bea12)
+![Screenshot from 2025-04-07 21-11-46](https://github.com/user-attachments/assets/50075d2c-e973-4cbf-91e1-ff609de8e566)
 
 
 ### Build Instructions
