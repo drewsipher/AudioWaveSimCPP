@@ -12,7 +12,7 @@ void main() {
     vec3 source = texture(sources, TexCoords).rgb;
 
     float red = clamp(waveHeight, 0.0, 1.0) + source.r;
-    float green = (1.0-(speed/343.0)) + source.r;
+    float green = ((1.0-(speed/343.0))*0.25) + source.r;
     float blue = clamp(-waveHeight, 0.0, 1.0) + source.r;
 
     if (isnan(waveHeight)) {

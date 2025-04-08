@@ -12,30 +12,6 @@ SimulationGrid::SimulationGrid(const int& width, const int& height): _width(widt
     CreateDampingMask();
 }
 
-// // Copy constructor
-// SimulationGrid::SimulationGrid(const SimulationGrid& other)
-//     : _width(other._width), _height(other._height), spacing(other.spacing),
-//       damping_thickness(other.damping_thickness), default_density(other.default_density),
-//       density_variations(other.density_variations), base(other.base.clone()),
-//       density(other.density.clone()), damping_mask(other.damping_mask.clone()) {}
-
-// // Copy assignment operator
-// SimulationGrid& SimulationGrid::operator=(const SimulationGrid& other) {
-//     if (this == &other) {
-//         return *this;
-//     }
-//     _width = other._width;
-//     _height = other._height;
-//     spacing = other.spacing;
-//     damping_thickness = other.damping_thickness;
-//     default_density = other.default_density;
-//     density_variations = other.density_variations;
-//     base = other.base.clone();
-//     density = other.density.clone();
-//     damping_mask = other.damping_mask.clone();
-//     return *this;
-// }
-
 void SimulationGrid::SetDensityArea(const DensityVariation& variation) {
     for (int i = variation.y_range.first; i < variation.y_range.second; ++i) {
         for (int j = variation.x_range.first; j < variation.x_range.second; ++j) {

@@ -103,7 +103,7 @@ void Visualizer::CreateTextures() {
     cv::Mat speedImage = cv::Mat::zeros(_height, _width, CV_32F);
     speedImage.setTo(343.0f);
     _maxSimSpeed = 343.0f;
-    // cv::circle(speedImage, cv::Point(_width / 2, _height / 2), std::min(_width, _height) / 4, cv::Scalar(200.0f), -1);
+    cv::circle(speedImage, cv::Point(_width / 2, _height / 2), std::min(_width, _height) / 4, cv::Scalar(200.0f), -1);
     
     glGenTextures(1, &_speedsTex);
     glBindTexture(GL_TEXTURE_2D, _speedsTex);

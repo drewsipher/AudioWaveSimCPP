@@ -13,8 +13,6 @@ public:
     };
 
     SimulationGrid(const int& width = 500, const int& height = 500);
-    // SimulationGrid(const SimulationGrid& other); // Copy constructor
-    // SimulationGrid& operator=(const SimulationGrid& other); // Copy assignment operator
     void SetDensityArea(const DensityVariation& variation);
     
     cv::Mat_<double> base;

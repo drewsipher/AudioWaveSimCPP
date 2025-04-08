@@ -21,9 +21,9 @@ private:
     int _width;
     int _height;
 
-    float _frequency = 100.0f;
+    float _frequency = 30.0f;
     float _length = 20.0f;
-    float _amplitude = 1.0f;
+    float _amplitude = 2.0f;
     float _maxSimSpeed = 343;
     
     std::string LoadShaderSource(const char* filePath);
