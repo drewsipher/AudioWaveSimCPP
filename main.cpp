@@ -1,5 +1,4 @@
 #include <iostream>
-#include "src/SimulationGrid.h"
 #include "src/Visualizer.h"
 
 int main() {

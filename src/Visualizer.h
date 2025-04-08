@@ -12,19 +12,38 @@ public:
     void update();
     void close();
     bool isClosed() const;
-    int GetWidth() const { return _width; };
-    int GetHeight() const { return _height; };
+    int GetWidth() const;
+    int GetHeight() const;
 
 private:
     bool _closed = false;
     bool _simulationStart = false;
+    bool _mouseIsPressed = false;
     int _width;
     int _height;
 
     float _frequency = 30.0f;
     float _length = 20.0f;
     float _amplitude = 2.0f;
-    float _maxSimSpeed = 343;
+    float _maxSimSpeed = 343.0f;
+    float _maxSpeed = 1000.0f;
+    float _currentSpeed = 343.0f;
+
+    enum EditMode {
+        EDIT_SOURCES,
+        EDIT_SPEEDS
+    };
+    int _editMode = EDIT_SOURCES;
+
+    enum SpeedShape {
+        SHAPE_RECTANGLE,
+        SHAPE_CIRCLE
+    };
+    int _speedShape = SHAPE_RECTANGLE;
+
+    // New member variables for drawing shapes
+    bool _isDrawing = false;
+    cv::Point2i _startPoint;
     
     std::string LoadShaderSource(const char* filePath);
     GLuint CompileShader(GLenum type, const char* filePath);
@@ -34,7 +53,9 @@ private:
     GLuint CreateComputeShader(const char* filePath);
     void CheckOpenGLError(const std::string& errorMessage);
     void DrawUI();
-    void AddValueToTexture(double xpos, double ypos);
+    void ApplySpeed(double xpos, double ypos);
+    void ApplySource(double xpos, double ypos);
+    void DrawSpeedShape(double x1, double y1, double x2, double y2); // Updated signature
     void Reset();
 
     cv::Point2i _lastMousePoint = cv::Point2i(-1, -1);
